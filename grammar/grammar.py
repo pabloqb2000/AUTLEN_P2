@@ -270,8 +270,20 @@ class LL1Table:
         Raises:
             SyntaxError: if the input string is not syntactically correct.
         """
-        
-	# TO-DO: Complete this method for exercise 2...
+        while len(start) > 0 and len(input_string) > 0:
+            key = start[0],  input_string[0]
+
+            if not key in self.cells:
+                raise SyntaxError("Not parsed")
+
+            start = self.cells[key] + start[1:]
+            
+            if len(start) > 0 and start[0] == input_string[0]:
+                input_string = input_string[1:]
+                start = start[1:]
+
+        if input_string != '$':
+            raise SyntaxError("Not parsed")
 
         return ParseTree("") # Return an empty tree by default.
     
