@@ -144,7 +144,7 @@ class Grammar:
             Follow set of symbol.
         """
 
-	# TO-DO: Complete this method for exercise 4...
+	# TO-DO: Complete this method for exercise 4... 
 	
 
     def get_ll1_table(self) -> Optional[LL1Table]:
