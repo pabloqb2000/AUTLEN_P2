@@ -103,6 +103,18 @@ class Grammar:
             f"productions={self.productions!r})"
         )
 
+    def compute_first_rec(self, sub_str: str):
+        if sub_str == '':
+            return set([''])
+        if sub_str[0] in self.terminals:
+            return set(sub_str[0])
+        
+        first_set = set()
+        for production in self.productions:
+            if sub_str[0] == production.left:
+                first_set |= self.compute_first_rec(production.right + sub_str[1:])
+        return first_set 
+
 
     def compute_first(self, sentence: str) -> AbstractSet[str]:
         """
@@ -114,8 +126,11 @@ class Grammar:
         Returns:
             First set of str.
         """
-
-	# TO-DO: Complete this method for exercise 3...
+        for s in sentence:
+            if s not in self.terminals and s not in self.non_terminals:
+                raise ValueError("Sentence should be made up of terminal/non terminal nodes")
+            
+        return self.compute_first_rec(sentence)
 
 
     def compute_follow(self, symbol: str) -> AbstractSet[str]:

@@ -72,10 +72,10 @@ class ASTReplaceNum(NodeTransformer):
 
 
 class ASTRemoveConstantIf(NodeTransformer):
-    def visit_If(self, node):
+    def visit_If(self, node):        
         if type(node.test) == ast.Constant:
             if node.test.value == True:
-                return node.body
+                return self.visit(node.body[0])
             elif node.test.value == False:
-                return node.orelse
+                return self.visit(node.orelse[0])
         return node
