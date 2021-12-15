@@ -34,6 +34,71 @@ class TestFollow(unittest.TestCase):
         self._check_follow(grammar, "X", {'$', ')'})
         self._check_follow(grammar, "Y", {'$', ')', '+'})
 
+    def test_case2(self) -> None:
+        """Test Case 2."""
+        grammar_str = """
+        X->I*AD
+        I->A*I
+        I->a
+        I->
+        A->aa*A
+        A->a
+        A->
+        D->*
+        D->
+        """
+
+        grammar = GrammarFormat.read(grammar_str)
+        self._check_follow(grammar, "A", {'$', '*'})
+        self._check_follow(grammar, "D", {'$'})
+        self._check_follow(grammar, "I", {'*'})
+        self._check_follow(grammar, "X", {'$'})
+
+        
+    def test_case3(self) -> None:
+        """Test Case 3."""
+        grammar_str = """
+        A->BCD
+        B-><
+        B->
+        C->0C;
+        C->1C;
+        D->0>
+        D->1>
+        """
+
+        grammar = GrammarFormat.read(grammar_str)
+        self._check_follow(grammar, "A", {'$'})
+        self._check_follow(grammar, "B", {'1', '0'})
+        self._check_follow(grammar, "C", {'1', '0', ';'})
+        self._check_follow(grammar, "D", {'$'})
+
+
+    def test_case4(self) -> None:
+        """Test Case 4."""
+        grammar_str = """
+        T->FGH
+        F->Gb
+        F->
+        G->Nd
+        G->
+        H->aA
+        H->
+        N->0N
+        N->1N
+        N->
+        A->a
+        A->
+        """
+
+        grammar = GrammarFormat.read(grammar_str)
+        self._check_follow(grammar, "A", {'$'})
+        self._check_follow(grammar, "F", {'1', 'd', '0', '$', 'a'})
+        self._check_follow(grammar, "G", {'b', '$', 'a'})
+        self._check_follow(grammar, "H", {'$'})
+        self._check_follow(grammar, "N", {'d'})
+        self._check_follow(grammar, "T", {'$'})
+
 
 if __name__ == '__main__':
     unittest.main()

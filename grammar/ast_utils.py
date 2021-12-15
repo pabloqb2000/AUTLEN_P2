@@ -78,4 +78,4 @@ class ASTRemoveConstantIf(NodeTransformer):
                 return self.visit(node.body[0])
             elif node.test.value == False:
                 return self.visit(node.orelse[0])
-        return node
+        return self.visit(node)

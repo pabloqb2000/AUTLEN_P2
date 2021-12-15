@@ -100,7 +100,60 @@ class TestAnalyze(unittest.TestCase):
         self._check_analyze_from_grammar(grammar, "i*i", "E", exception=SyntaxError)
         self._check_analyze_from_grammar(grammar, "+i*i", "E", exception=SyntaxError)
 
+
+        terminals = {"(", ")", "i", "+", "*", "$"}
+        non_terminals = {"E", "T", "X", "Y"}
+        cells = [TableCell('E', '(', 'TX'),
+                 TableCell('E', 'i', 'TX'),
+                 TableCell('T', '(', '(E)'),
+                 TableCell('T', 'i', 'iY'),
+                 TableCell('X', '+', '+E'),
+                 TableCell('X', ')', ''),
+                 TableCell('X', '$', ''),
+                 TableCell('Y', '*', '*T'),
+                 TableCell('Y', '+', ''),
+                 TableCell('Y', ')', ''),
+                 TableCell('Y', '$', '')]
+        table = LL1Table(non_terminals, terminals, cells)
+        self.assertEqual(grammar.get_ll1_table().terminals, table.terminals)
+        self.assertEqual(grammar.get_ll1_table().non_terminals, table.non_terminals)
+        self.assertDictEqual(grammar.get_ll1_table().cells, table.cells)
+
     def test_case4(self) -> None:
+        """Test for syntax analysis from grammar."""
+        grammar_str = """
+        A->BCD
+        B-><
+        B->
+        C->0C
+        C->1C
+        D->0>
+        D->1>
+        """
+
+        grammar = GrammarFormat.read(grammar_str)
+
+        terminals = {'<', '0', '1', '>', '$'}
+        non_terminals = {'A', 'B', 'C', 'D'}
+        cells = [TableCell('A', '0', 'BCD'),
+                 TableCell('A', '1', 'BCD'),
+                 TableCell('A', '<', 'BCD'),
+                 TableCell('B', '0', ''),
+                 TableCell('B', '1', ''),
+                 TableCell('B', '<', '<'),
+                 TableCell('C', '0', '0C'),
+                 TableCell('C', '1', '1C'),
+                 TableCell('D', '0', '0>'),
+                 TableCell('D', '1', '1>')]
+        table = LL1Table(non_terminals, terminals, cells)
+        self.assertEqual(grammar.get_ll1_table().terminals, table.terminals)
+        self.assertEqual(grammar.get_ll1_table().non_terminals, table.non_terminals)
+        self.assertDictEqual(grammar.get_ll1_table().cells, table.cells)
+
+        self._check_analyze_from_grammar(grammar, "0", "E", exception=SyntaxError)
+        self._check_analyze_from_grammar(grammar, "<0101;;;;1>", "E", exception=SyntaxError)
+    
+    def test_case5(self) -> None:
         """Test non LL1 grammar"""
         grammar_str = """
         X->I*AD
@@ -112,6 +165,25 @@ class TestAnalyze(unittest.TestCase):
         A->
         D->*
         D->
+        """
+        grammar = GrammarFormat.read(grammar_str)
+        self.assertEqual(grammar.get_ll1_table(), None)
+
+    def test_case6(self) -> None:
+        """Test non LL1 grammar"""
+        grammar_str = """
+        T->FGH
+        F->Gb
+        F->
+        G->Nd
+        G->
+        H->aA
+        H->
+        N->0N
+        N->1N
+        N->
+        A->a
+        A->
         """
         grammar = GrammarFormat.read(grammar_str)
         self.assertEqual(grammar.get_ll1_table(), None)
