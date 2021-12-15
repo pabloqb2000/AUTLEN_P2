@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import deque
+from collections import deque, Set
 from typing import AbstractSet, Collection, MutableSet, Optional
 
 class RepeatedCellError(Exception):
@@ -143,9 +143,26 @@ class Grammar:
         Returns:
             Follow set of symbol.
         """
+        follows = {nt:set() for nt in self.non_terminals}
+        follows[self.productions[0].left].add('$')
+        follows_old = follows.copy()
 
-	# TO-DO: Complete this method for exercise 4... 
-	
+        while True:
+            for p in self.productions:
+                for i, s in enumerate(p.right):
+                    if s in self.non_terminals:
+                        if i == len(p.right) - 1:
+                            follows[s] = follows[s].union(follows[p.left])
+                        else:
+                            first = self.compute_first(p.right[i+1:])
+                            if '' in first:
+                                follows[s] = follows[s].union(follows[p.left])
+                            follows[s] = follows[s].union(first - set(['']))
+            if follows == follows_old:
+                break
+            follows_old = follows.copy()
+        return follows[symbol]
+
 
     def get_ll1_table(self) -> Optional[LL1Table]:
         """
@@ -154,9 +171,23 @@ class Grammar:
         Returns:
             LL(1) table for the grammar, or None if the grammar is not LL(1).
         """
+        cells = []
+        used = set()
+        for p in self.productions:
+            for t in self.compute_first(p.right):
+                if t == '':
+                    for t2 in self.compute_follow(p.left):
+                        if (p.left, t2) in used:
+                            return None
+                        cells.append(TableCell(p.left, t2, p.right))
+                        used.add((p.left, t2))
+                else:
+                    if (p.left, t) in used:
+                        return None
+                    cells.append(TableCell(p.left, t, p.right))
+                    used.add((p.left, t))
 
-	# TO-DO: Complete this method for exercise 5...
-
+        return LL1Table(self.non_terminals, self.terminals.union(set('$')), cells)
 
     def is_ll1(self) -> bool:
         return self.get_ll1_table() is not None
